@@ -1,6 +1,8 @@
 idf_component_register(
     SRCS
         "image_display.c"
+        "profile.c"
+        "my_lvgl.c"
     INCLUDE_DIRS
         "")
 

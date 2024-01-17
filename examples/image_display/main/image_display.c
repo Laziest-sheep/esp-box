@@ -8,6 +8,7 @@
 
 #include "bsp/esp-bsp.h"
 #include "esp_log.h"
+#include "my_lvgl.h"
 
 static const char *TAG = "main";
 
@@ -27,9 +28,10 @@ void app_main(void)
     bsp_display_backlight_on();
 
     /* Mount SPIFFS */
-    bsp_spiffs_mount();
+    // bsp_spiffs_mount();
 
-    image_display();
+    // image_display();
+    screen_init();
 }
 
 static void btn_event_cb(lv_event_t *event)
