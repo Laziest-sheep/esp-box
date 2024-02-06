@@ -7,14 +7,59 @@
 #include <dirent.h>
 
 #include "bsp/esp-bsp.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "bsp_board.h"
 #include "esp_log.h"
 #include "my_lvgl.h"
+#include "file_iterator.h"
+#include "audio_player.h"
+#include "settings.h"
 
 static const char *TAG = "main";
 
 static lv_group_t *g_btn_op_group = NULL;
 
 static void image_display(void);
+
+static esp_err_t audio_mute_function(AUDIO_PLAYER_MUTE_SETTING setting)
+{
+    // Volume saved when muting and restored when unmuting. Restoring volume is necessary
+    // as es8311_set_voice_mute(true) results in voice volume (REG32) being set to zero.
+    static int last_volume;
+
+    sys_param_t *param = settings_get_parameter();
+    if (param->volume != 0) {
+        last_volume = param->volume;
+    }
+
+    bsp_codec_mute_set(setting == AUDIO_PLAYER_MUTE ? true : false);
+
+    // restore the voice volume upon unmuting
+    if (setting == AUDIO_PLAYER_UNMUTE) {
+        bsp_codec_volume_set(param->volume, NULL);
+    }
+
+    ESP_LOGI(TAG, "mute setting %d, volume:%d", setting, last_volume);
+
+    return ESP_OK;
+}
+
+
+file_iterator_instance_t *file_iterator;
+void sr_init(void)
+{
+    file_iterator = file_iterator_new("/spiffs");
+    assert(file_iterator != NULL);
+    audio_player_config_t config = { .mute_fn = audio_mute_function,
+                                     .write_fn = bsp_i2s_write,
+                                     .clk_set_fn = bsp_codec_set_fs,
+                                     .priority = 5
+                                   };
+    ESP_ERROR_CHECK(audio_player_new(config));
+
+    app_sr_start(false);
+}
 
 void app_main(void)
 {
@@ -28,10 +73,16 @@ void app_main(void)
     bsp_display_backlight_on();
 
     /* Mount SPIFFS */
-    // bsp_spiffs_mount();
+    bsp_spiffs_mount();
+
+    bsp_board_init();
+
+    vTaskDelay(pdMS_TO_TICKS(500));
 
     // image_display();
     screen_init();
+
+    sr_init();
 }
 
 static void btn_event_cb(lv_event_t *event)
