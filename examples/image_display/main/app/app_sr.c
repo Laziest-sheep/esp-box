@@ -116,158 +116,158 @@ static const sr_cmd_t g_default_cmd_info[] = {
 
 static void audio_feed_task(void *arg)
 {
-    // size_t bytes_read = 0;
-    // esp_afe_sr_data_t *afe_data = (esp_afe_sr_data_t *) arg;
-    // int audio_chunksize = afe_handle->get_feed_chunksize(afe_data);
-    // int feed_channel = 3;
-    // ESP_LOGI(TAG, "audio_chunksize=%d, feed_channel=%d", audio_chunksize, feed_channel);
+    size_t bytes_read = 0;
+    esp_afe_sr_data_t *afe_data = (esp_afe_sr_data_t *) arg;
+    int audio_chunksize = afe_handle->get_feed_chunksize(afe_data);
+    int feed_channel = 3;
+    ESP_LOGI(TAG, "audio_chunksize=%d, feed_channel=%d", audio_chunksize, feed_channel);
 
-    // /* Allocate audio buffer and check for result */
-    // int16_t *audio_buffer = heap_caps_malloc(audio_chunksize * sizeof(int16_t) * feed_channel, MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
-    // if (NULL == audio_buffer) {
-    //     esp_system_abort("No mem for audio buffer");
-    // }
-    // g_sr_data->afe_in_buffer = audio_buffer;
+    /* Allocate audio buffer and check for result */
+    int16_t *audio_buffer = heap_caps_malloc(audio_chunksize * sizeof(int16_t) * feed_channel, MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
+    if (NULL == audio_buffer) {
+        esp_system_abort("No mem for audio buffer");
+    }
+    g_sr_data->afe_in_buffer = audio_buffer;
 
-    // while (true) {
-    //     if (NEED_DELETE && xEventGroupGetBits(g_sr_data->event_group)) {
-    //         xEventGroupSetBits(g_sr_data->event_group, FEED_DELETED);
-    //         vTaskDelete(NULL);
-    //     }
+    while (true) {
+        if (NEED_DELETE && xEventGroupGetBits(g_sr_data->event_group)) {
+            xEventGroupSetBits(g_sr_data->event_group, FEED_DELETED);
+            vTaskDelete(NULL);
+        }
 
-    //     if (true == bsp_board_get_sensor_handle()->get_sleep_mode()) {
-    //         vTaskDelay(pdMS_TO_TICKS(500));
-    //         continue;
-    //     }
+        if (true == bsp_board_get_sensor_handle()->get_sleep_mode()) {
+            vTaskDelay(pdMS_TO_TICKS(500));
+            continue;
+        }
 
-    //     if (false == get_mute_play_flag()) {
-    //         vTaskDelay(pdMS_TO_TICKS(500));
-    //         continue;
-    //     }
+        // if (false == get_mute_play_flag()) {
+        //     vTaskDelay(pdMS_TO_TICKS(500));
+        //     continue;
+        // }
 
-    //     if (true == sensor_ir_learn_enable()) {
-    //         vTaskDelay(pdMS_TO_TICKS(100));
-    //         continue;
-    //     }
+        // if (true == sensor_ir_learn_enable()) {
+        //     vTaskDelay(pdMS_TO_TICKS(100));
+        //     continue;
+        // }
 
-    //     /* Read audio data from I2S bus */
-    //     bsp_i2s_read((char *)audio_buffer, audio_chunksize * I2S_CHANNEL_NUM * sizeof(int16_t), &bytes_read, portMAX_DELAY);
+        /* Read audio data from I2S bus */
+        bsp_i2s_read((char *)audio_buffer, audio_chunksize * I2S_CHANNEL_NUM * sizeof(int16_t), &bytes_read, portMAX_DELAY);
 
-    //     /* Save audio data to file if record enabled */
-    //     if (g_sr_data->b_record_en && (NULL != g_sr_data->fp)) {
-    //         fwrite(audio_buffer, 1, audio_chunksize * I2S_CHANNEL_NUM * sizeof(int16_t), g_sr_data->fp);
-    //     }
+        /* Save audio data to file if record enabled */
+        // if (g_sr_data->b_record_en && (NULL != g_sr_data->fp)) {
+        //     fwrite(audio_buffer, 1, audio_chunksize * I2S_CHANNEL_NUM * sizeof(int16_t), g_sr_data->fp);
+        // }
 
-    //     /* Channel Adjust */
-    //     for (int  i = audio_chunksize - 1; i >= 0; i--) {
-    //         audio_buffer[i * 3 + 2] = 0;
-    //         audio_buffer[i * 3 + 1] = audio_buffer[i * 2 + 1];
-    //         audio_buffer[i * 3 + 0] = audio_buffer[i * 2 + 0];
-    //     }
-    //     /* Feed samples of an audio stream to the AFE_SR */
-    //     afe_handle->feed(afe_data, audio_buffer);
-    // }
+        /* Channel Adjust */
+        for (int  i = audio_chunksize - 1; i >= 0; i--) {
+            audio_buffer[i * 3 + 2] = 0;
+            audio_buffer[i * 3 + 1] = audio_buffer[i * 2 + 1];
+            audio_buffer[i * 3 + 0] = audio_buffer[i * 2 + 0];
+        }
+        /* Feed samples of an audio stream to the AFE_SR */
+        afe_handle->feed(afe_data, audio_buffer);
+    }
 }
 
 static void audio_detect_task(void *arg)
 {
-//     bool detect_flag = false;
-//     esp_afe_sr_data_t *afe_data = arg;
-//     int afe_chunksize = afe_handle->get_fetch_chunksize(afe_data);
-//     //int nch = afe_handle->get_channel_num(afe_data);
+    bool detect_flag = false;
+    esp_afe_sr_data_t *afe_data = arg;
+    int afe_chunksize = afe_handle->get_fetch_chunksize(afe_data);
+    //int nch = afe_handle->get_channel_num(afe_data);
 
-//     int mu_chunksize = g_sr_data->multinet->get_samp_chunksize(g_sr_data->model_data);
-//     assert(mu_chunksize == afe_chunksize);
-//     ESP_LOGI(TAG, "------------detect start------------\n");
+    int mu_chunksize = g_sr_data->multinet->get_samp_chunksize(g_sr_data->model_data);
+    assert(mu_chunksize == afe_chunksize);
+    ESP_LOGI(TAG, "------------detect start------------\n");
 
-//     while (true) {
-//         if (NEED_DELETE && xEventGroupGetBits(g_sr_data->event_group)) {
-//             xEventGroupSetBits(g_sr_data->event_group, DETECT_DELETED);
-//             vTaskDelete(g_sr_data->handle_task);
-//             vTaskDelete(NULL);
-//         }
+    while (true) {
+        if (NEED_DELETE && xEventGroupGetBits(g_sr_data->event_group)) {
+            xEventGroupSetBits(g_sr_data->event_group, DETECT_DELETED);
+            vTaskDelete(g_sr_data->handle_task);
+            vTaskDelete(NULL);
+        }
 
-//         afe_fetch_result_t *res = afe_handle->fetch(afe_data);
-//         if (!res || res->ret_value == ESP_FAIL) {
-//             continue;
-//         }
+        afe_fetch_result_t *res = afe_handle->fetch(afe_data);
+        if (!res || res->ret_value == ESP_FAIL) {
+            continue;
+        }
 
-//         if (res->wakeup_state == WAKENET_DETECTED) {
-//             ESP_LOGI(TAG, LOG_BOLD(LOG_COLOR_GREEN) "wakeword detected");
-//             sr_result_t result = {
-//                 .wakenet_mode = WAKENET_DETECTED,
-//                 .state = ESP_MN_STATE_DETECTING,
-//                 .command_id = 0,
-//             };
-//             xQueueSend(g_sr_data->result_que, &result, 0);
-//         } else if (res->wakeup_state == WAKENET_CHANNEL_VERIFIED) {
-//             detect_flag = true;
-//             g_sr_data->afe_handle->disable_wakenet(afe_data);
-//             ESP_LOGI(TAG, LOG_BOLD(LOG_COLOR_GREEN) "AFE_FETCH_CHANNEL_VERIFIED, channel index: %d\n", res->trigger_channel_id);
-//         }
+        if (res->wakeup_state == WAKENET_DETECTED) {
+            ESP_LOGI(TAG, LOG_BOLD(LOG_COLOR_GREEN) "wakeword detected");
+            sr_result_t result = {
+                .wakenet_mode = WAKENET_DETECTED,
+                .state = ESP_MN_STATE_DETECTING,
+                .command_id = 0,
+            };
+            xQueueSend(g_sr_data->result_que, &result, 0);
+        } else if (res->wakeup_state == WAKENET_CHANNEL_VERIFIED) {
+            detect_flag = true;
+            g_sr_data->afe_handle->disable_wakenet(afe_data);
+            ESP_LOGI(TAG, LOG_BOLD(LOG_COLOR_GREEN) "AFE_FETCH_CHANNEL_VERIFIED, channel index: %d\n", res->trigger_channel_id);
+        }
 
-//         if (true == detect_flag) {
-//             /* Save audio data to file if record enabled */
-//             if (g_sr_data->b_record_en && (NULL != g_sr_data->fp)) {
-//                 fwrite(res->data, 1, afe_chunksize * sizeof(int16_t), g_sr_data->fp);
-//             }
+        if (true == detect_flag) {
+            /* Save audio data to file if record enabled */
+            // if (g_sr_data->b_record_en && (NULL != g_sr_data->fp)) {
+            //     fwrite(res->data, 1, afe_chunksize * sizeof(int16_t), g_sr_data->fp);
+            // }
 
-//             esp_mn_state_t mn_state = ESP_MN_STATE_DETECTING;
-//             if (false == sr_echo_is_playing()) {
-//                 mn_state = g_sr_data->multinet->detect(g_sr_data->model_data, res->data);
-//             } else {
-//                 continue;
-//             }
+            esp_mn_state_t mn_state = ESP_MN_STATE_DETECTING;
+            if (false == sr_echo_is_playing()) {
+                mn_state = g_sr_data->multinet->detect(g_sr_data->model_data, res->data);
+            } else {
+                continue;
+            }
 
-//             if (ESP_MN_STATE_DETECTING == mn_state) {
-//                 continue;
-//             }
+            if (ESP_MN_STATE_DETECTING == mn_state) {
+                continue;
+            }
 
-//             if (ESP_MN_STATE_TIMEOUT == mn_state) {
-//                 ESP_LOGW(TAG, "Time out");
-//                 sr_result_t result = {
-//                     .wakenet_mode = WAKENET_NO_DETECT,
-//                     .state = mn_state,
-//                     .command_id = 0,
-//                 };
-//                 xQueueSend(g_sr_data->result_que, &result, 0);
-//                 g_sr_data->afe_handle->enable_wakenet(afe_data);
-//                 detect_flag = false;
-//                 continue;
-//             }
+            if (ESP_MN_STATE_TIMEOUT == mn_state) {
+                ESP_LOGW(TAG, "Time out");
+                sr_result_t result = {
+                    .wakenet_mode = WAKENET_NO_DETECT,
+                    .state = mn_state,
+                    .command_id = 0,
+                };
+                xQueueSend(g_sr_data->result_que, &result, 0);
+                g_sr_data->afe_handle->enable_wakenet(afe_data);
+                detect_flag = false;
+                continue;
+            }
 
-//             if (ESP_MN_STATE_DETECTED == mn_state) {
-//                 esp_mn_results_t *mn_result = g_sr_data->multinet->get_results(g_sr_data->model_data);
-//                 for (int i = 0; i < mn_result->num; i++) {
-//                     printf("TOP %d, command_id: %d, phrase_id: %d, prob: %f\n",
-//                            i + 1, mn_result->command_id[i], mn_result->phrase_id[i], mn_result->prob[i]);
-//                 }
+            if (ESP_MN_STATE_DETECTED == mn_state) {
+                esp_mn_results_t *mn_result = g_sr_data->multinet->get_results(g_sr_data->model_data);
+                for (int i = 0; i < mn_result->num; i++) {
+                    printf("TOP %d, command_id: %d, phrase_id: %d, prob: %f\n",
+                           i + 1, mn_result->command_id[i], mn_result->phrase_id[i], mn_result->prob[i]);
+                }
 
-//                 int sr_command_id = mn_result->command_id[0];
-//                 ESP_LOGI(TAG, "Deteted command : %d", sr_command_id);
-//                 sr_result_t result = {
-//                     .wakenet_mode = WAKENET_NO_DETECT,
-//                     .state = mn_state,
-//                     .command_id = sr_command_id,
-//                 };
-//                 xQueueSend(g_sr_data->result_que, &result, 0);
-// #if !SR_CONTINUE_DET
-//                 g_sr_data->afe_handle->enable_wakenet(afe_data);
-//                 detect_flag = false;
-// #endif
+                int sr_command_id = mn_result->command_id[0];
+                ESP_LOGI(TAG, "Deteted command : %d", sr_command_id);
+                sr_result_t result = {
+                    .wakenet_mode = WAKENET_NO_DETECT,
+                    .state = mn_state,
+                    .command_id = sr_command_id,
+                };
+                xQueueSend(g_sr_data->result_que, &result, 0);
+#if !SR_CONTINUE_DET
+                g_sr_data->afe_handle->enable_wakenet(afe_data);
+                detect_flag = false;
+#endif
 
-//                 if (g_sr_data->b_record_en && (NULL != g_sr_data->fp)) {
-//                     ESP_LOGI(TAG, "File saved");
-//                     fclose(g_sr_data->fp);
-//                     g_sr_data->fp = NULL;
-//                 }
-//                 continue;
-//             }
-//             ESP_LOGE(TAG, "Exception unhandled");
-//         }
-//     }
-//     /* Task never returns */
-//     vTaskDelete(NULL);
+                // if (g_sr_data->b_record_en && (NULL != g_sr_data->fp)) {
+                //     ESP_LOGI(TAG, "File saved");
+                //     fclose(g_sr_data->fp);
+                //     g_sr_data->fp = NULL;
+                // }
+                continue;
+            }
+            ESP_LOGE(TAG, "Exception unhandled");
+        }
+    }
+    /* Task never returns */
+    vTaskDelete(NULL);
 }
 
 esp_err_t app_sr_set_language(sr_language_t new_lang)
@@ -373,13 +373,13 @@ esp_err_t app_sr_start(bool record_en)
     ret = app_sr_set_language(param->sr_lang);
     ESP_GOTO_ON_FALSE(ESP_OK == ret, ESP_FAIL, err, TAG,  "Failed to set language");
 
-    ret_val = xTaskCreatePinnedToCore(&audio_feed_task, "Feed Task", 4 * 1024, (void *)afe_data, 5, &g_sr_data->feed_task, 0);
+    ret_val = xTaskCreatePinnedToCore(&audio_feed_task, "Feed Task", 4 * 1024, (void *)afe_data, 0, &g_sr_data->feed_task, 0);
     ESP_GOTO_ON_FALSE(pdPASS == ret_val, ESP_FAIL, err, TAG,  "Failed create audio feed task");
 
     ret_val = xTaskCreatePinnedToCore(&audio_detect_task, "Detect Task", 8 * 1024, (void *)afe_data, 5, &g_sr_data->detect_task, 1);
     ESP_GOTO_ON_FALSE(pdPASS == ret_val, ESP_FAIL, err, TAG,  "Failed create audio detect task");
 
-    ret_val = xTaskCreatePinnedToCore(&sr_handler_task, "SR Handler Task", 6 * 1024, NULL, configMAX_PRIORITIES - 1, &g_sr_data->handle_task, 0);
+    ret_val = xTaskCreatePinnedToCore(&sr_handler_task, "SR Handler Task", 6 * 1024, NULL, 0, &g_sr_data->handle_task, 0);
     ESP_GOTO_ON_FALSE(pdPASS == ret_val, ESP_FAIL, err, TAG,  "Failed create audio handler task");
 
     return ESP_OK;

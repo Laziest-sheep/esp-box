@@ -151,138 +151,148 @@ sr_language_t sr_detect_language()
 
 void sr_handler_task(void *pvParam)
 {
-//     FILE *fp;
-//     char filename[128];
+    FILE *fp;
+    char filename[128];
 
-//     sr_language_t sr_current_lang;
-//     audio_player_state_t last_player_state = AUDIO_PLAYER_STATE_IDLE;
+    sr_language_t sr_current_lang;
+    audio_player_state_t last_player_state = AUDIO_PLAYER_STATE_IDLE;
 
-//     while (true) {
-//         sr_result_t result;
-//         app_sr_get_result(&result, portMAX_DELAY);
+    while (true) {
+        sr_result_t result;
+        app_sr_get_result(&result, portMAX_DELAY);
 
-//         sr_current_lang = sr_detect_language();
+        sr_current_lang = sr_detect_language();
 
-//         if (ESP_MN_STATE_TIMEOUT == result.state) {
-//             if (SR_LANG_EN == sr_current_lang) {
-//                 sr_anim_set_text("Timeout");
-//             } else {
-//                 sr_anim_set_text("超时");
-//             }
-//             if (AUDIO_PLAYER_STATE_PLAYING == last_player_state) {
-//                 audio_player_pause();
-//             }
-// #if !SR_RUN_TEST
-//             sr_echo_play(AUDIO_END);
-// #endif
-//             sr_anim_stop();
-//             if (AUDIO_PLAYER_STATE_PLAYING == last_player_state) {
-//                 audio_player_resume();
-//             }
-//             continue;
-//         }
+        if (ESP_MN_STATE_TIMEOUT == result.state) {
+            if (SR_LANG_EN == sr_current_lang) {
+                // sr_anim_set_text("Timeout");
+                ESP_LOGI(TAG, "Timeout");
+            } else {
+                // sr_anim_set_text("超时");
+                ESP_LOGI(TAG, "超时");
+            }
+            if (AUDIO_PLAYER_STATE_PLAYING == last_player_state) {
+                audio_player_pause();
+            }
+#if !SR_RUN_TEST
+            sr_echo_play(AUDIO_END);
+#endif
+            // sr_anim_stop();
+            if (AUDIO_PLAYER_STATE_PLAYING == last_player_state) {
+                audio_player_resume();
+            }
+            continue;
+        }
 
-//         if (WAKENET_DETECTED == result.wakenet_mode) {
-//             sr_anim_start();
-//             last_player_state = audio_player_get_state();
-//             audio_player_pause();
-//             if (SR_LANG_EN == sr_current_lang) {
-//                 sr_anim_set_text("Say command");
-//             } else {
-//                 sr_anim_set_text("请说");
-//             }
-// #if !SR_RUN_TEST
-//             sr_echo_play(AUDIO_WAKE);
-// #endif
-//             continue;
-//         }
+        if (WAKENET_DETECTED == result.wakenet_mode) {
+            // sr_anim_start();
+            last_player_state = audio_player_get_state();
+            audio_player_pause();
+            if (SR_LANG_EN == sr_current_lang) {
+                ESP_LOGI(TAG, "Say command");
+                // sr_anim_set_text("Say command");
+            } else {
+                // sr_anim_set_text("请说");
+                ESP_LOGI(TAG, "请说");
+            }
+#if !SR_RUN_TEST
+            sr_echo_play(AUDIO_WAKE);
+#endif
+            continue;
+        }
 
-//         if (ESP_MN_STATE_DETECTED & result.state) {
-//             const sr_cmd_t *cmd = app_sr_get_cmd_from_id(result.command_id);
-//             ESP_LOGI(TAG, "command:%s, act:%d", cmd->str, cmd->cmd);
-//             sr_anim_set_text((char *) cmd->str);
-// #if !SR_CONTINUE_DET
-//             sr_anim_stop();
-//             if (PLAYER_STATE_PLAYING == last_player_state) {
-//                 app_player_play();
-//                 ESP_LOGW(TAG, "audio play");
-//             }
-// #endif
+        if (ESP_MN_STATE_DETECTED & result.state) {
+            const sr_cmd_t *cmd = app_sr_get_cmd_from_id(result.command_id);
+            ESP_LOGI(TAG, "command:%s, act:%d", cmd->str, cmd->cmd);
+            // sr_anim_set_text((char *) cmd->str);
+#if !SR_CONTINUE_DET
+            sr_anim_stop();
+            if (PLAYER_STATE_PLAYING == last_player_state) {
+                app_player_play();
+                ESP_LOGW(TAG, "audio play");
+            }
+#endif
 
-// #if !SR_RUN_TEST
-//             if (AUDIO_PLAYER_STATE_PLAYING == last_player_state) {
-//                 audio_player_pause();
-//             }
-//             sr_echo_play(AUDIO_OK);
-// #endif
+#if !SR_RUN_TEST
+            if (AUDIO_PLAYER_STATE_PLAYING == last_player_state) {
+                audio_player_pause();
+            }
+            sr_echo_play(AUDIO_OK);
+#endif
 
-//             switch (cmd->cmd) {
-//             case SR_CMD_SET_RED:
-//                 app_pwm_led_set_all(128, 0, 0);
-//                 break;
-//             case SR_CMD_SET_GREEN:
-//                 app_pwm_led_set_all(0, 128, 0);
-//                 break;
-//             case SR_CMD_SET_BLUE:
-//                 app_pwm_led_set_all(0, 0, 128);
-//                 break;
-//             case SR_CMD_LIGHT_ON:
-//                 app_pwm_led_set_power(1);
-//                 break;
-//             case SR_CMD_LIGHT_OFF:
-//                 app_pwm_led_set_power(0);
-//                 break;
-//             case SR_CMD_CUSTOMIZE_COLOR: {
-//                 uint16_t h;
-//                 uint8_t s, v;
-//                 app_pwm_led_get_customize_color(&h, &s, &v);
-//                 app_pwm_led_set_all_hsv(h, s, v);
-//             } break;
-//             case SR_CMD_NEXT:
-//                 file_iterator_next(file_iterator);
-//                 file_iterator_get_full_path_from_index(file_iterator, file_iterator_get_index(file_iterator), filename, sizeof(filename));
-//                 fp = fopen(filename, "rb");
-//                 if (!fp) {
-//                     ESP_LOGE(TAG, "unable to open '%s'", filename);
-//                 } else {
-//                     audio_player_play(fp);
-//                 }
-//                 last_player_state = AUDIO_PLAYER_STATE_PLAYING;
-//                 break;
-//             case SR_CMD_PLAY:
-//                 ESP_LOGD(TAG, "SR_CMD_PLAY:%d, last_player_state:%d", audio_player_get_state(), last_player_state);
-//                 if (AUDIO_PLAYER_STATE_IDLE == audio_player_get_state()) {
-//                     file_iterator_get_full_path_from_index(file_iterator, file_iterator_get_index(file_iterator), filename, sizeof(filename));
-//                     fp = fopen(filename, "rb");
-//                     if (!fp) {
-//                         ESP_LOGE(TAG, "unable to open '%s'", filename);
-//                     } else {
-//                         audio_player_play(fp);
-//                     }
-//                 } else if (AUDIO_PLAYER_STATE_PAUSE == audio_player_get_state()) {
-//                     audio_player_resume();
-//                 }
-//                 last_player_state = AUDIO_PLAYER_STATE_PLAYING;
-//                 break;
-//             case SR_CMD_PAUSE:
-//                 audio_player_pause();
-//                 last_player_state = AUDIO_PLAYER_STATE_PAUSE;
-//                 break;
+            switch (cmd->cmd) {
+            case SR_CMD_SET_RED:
+                // app_pwm_led_set_all(128, 0, 0);
+                ESP_LOGI(TAG, "SR_CMD_SET_RED");
+                break;
+            case SR_CMD_SET_GREEN:
+                // app_pwm_led_set_all(0, 128, 0);
+                ESP_LOGI(TAG, "SR_CMD_SET_GREEN");
+                break;
+            case SR_CMD_SET_BLUE:
+                // app_pwm_led_set_all(0, 0, 128);
+                ESP_LOGI(TAG, "SR_CMD_SET_BLUE");
+                break;
+            case SR_CMD_LIGHT_ON:
+                // app_pwm_led_set_power(1);
+                ESP_LOGI(TAG, "SR_CMD_LIGHT_ON");
+                break;
+            case SR_CMD_LIGHT_OFF:
+                // app_pwm_led_set_power(0);
+                ESP_LOGI(TAG, "SR_CMD_LIGHT_OFF");
+                break;
+            case SR_CMD_CUSTOMIZE_COLOR: {
+                // uint16_t h;
+                // uint8_t s, v;
+                // app_pwm_led_get_customize_color(&h, &s, &v);
+                // app_pwm_led_set_all_hsv(h, s, v);
+                ESP_LOGI(TAG, "SR_CMD_CUSTOMIZE_COLOR");
+            } break;
+            case SR_CMD_NEXT:
+                file_iterator_next(file_iterator);
+                file_iterator_get_full_path_from_index(file_iterator, file_iterator_get_index(file_iterator), filename, sizeof(filename));
+                fp = fopen(filename, "rb");
+                if (!fp) {
+                    ESP_LOGE(TAG, "unable to open '%s'", filename);
+                } else {
+                    audio_player_play(fp);
+                }
+                last_player_state = AUDIO_PLAYER_STATE_PLAYING;
+                break;
+            case SR_CMD_PLAY:
+                ESP_LOGD(TAG, "SR_CMD_PLAY:%d, last_player_state:%d", audio_player_get_state(), last_player_state);
+                if (AUDIO_PLAYER_STATE_IDLE == audio_player_get_state()) {
+                    file_iterator_get_full_path_from_index(file_iterator, file_iterator_get_index(file_iterator), filename, sizeof(filename));
+                    fp = fopen(filename, "rb");
+                    if (!fp) {
+                        ESP_LOGE(TAG, "unable to open '%s'", filename);
+                    } else {
+                        audio_player_play(fp);
+                    }
+                } else if (AUDIO_PLAYER_STATE_PAUSE == audio_player_get_state()) {
+                    audio_player_resume();
+                }
+                last_player_state = AUDIO_PLAYER_STATE_PLAYING;
+                break;
+            case SR_CMD_PAUSE:
+                audio_player_pause();
+                last_player_state = AUDIO_PLAYER_STATE_PAUSE;
+                break;
 
-//             case SR_CMD_AC_ON:
-//                 ui_sensor_set_ac_poweron();
-//                 break;
+            case SR_CMD_AC_ON:
+                // ui_sensor_set_ac_poweron();
+                break;
 
-//             case SR_CMD_AC_OFF:
-//                 ui_sensor_set_ac_poweroff();
-//                 break;
+            case SR_CMD_AC_OFF:
+                // ui_sensor_set_ac_poweroff();
+                break;
 
-//             default:
-//                 ESP_LOGE(TAG, "Unknow cmd");
-//                 break;
-//             }
+            default:
+                ESP_LOGE(TAG, "Unknow cmd");
+                break;
+            }
 
-//         }
-//     }
-//     vTaskDelete(NULL);
+        }
+    }
+    vTaskDelete(NULL);
 }
