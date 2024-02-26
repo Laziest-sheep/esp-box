@@ -11,7 +11,7 @@
 #include "esp_check.h"
 // #include "app_led.h"
 #include "app_sr.h"
-// #include "file_manager.h"
+#include "file_manager.h"
 #include "audio_player.h"
 #include "file_iterator.h"
 #include "bsp_board.h"
@@ -43,110 +43,108 @@ static audio_data_t g_audio_data[AUDIO_MAX];
 
 static esp_err_t sr_echo_play(audio_segment_t audio)
 {
-    // typedef struct {
-    //     // The "RIFF" chunk descriptor
-    //     uint8_t ChunkID[4];
-    //     int32_t ChunkSize;
-    //     uint8_t Format[4];
-    //     // The "fmt" sub-chunk
-    //     uint8_t Subchunk1ID[4];
-    //     int32_t Subchunk1Size;
-    //     int16_t AudioFormat;
-    //     int16_t NumChannels;
-    //     int32_t SampleRate;
-    //     int32_t ByteRate;
-    //     int16_t BlockAlign;
-    //     int16_t BitsPerSample;
-    //     // The "data" sub-chunk
-    //     uint8_t Subchunk2ID[4];
-    //     int32_t Subchunk2Size;
-    // } wav_header_t;
+    typedef struct {
+        // The "RIFF" chunk descriptor
+        uint8_t ChunkID[4];
+        int32_t ChunkSize;
+        uint8_t Format[4];
+        // The "fmt" sub-chunk
+        uint8_t Subchunk1ID[4];
+        int32_t Subchunk1Size;
+        int16_t AudioFormat;
+        int16_t NumChannels;
+        int32_t SampleRate;
+        int32_t ByteRate;
+        int16_t BlockAlign;
+        int16_t BitsPerSample;
+        // The "data" sub-chunk
+        uint8_t Subchunk2ID[4];
+        int32_t Subchunk2Size;
+    } wav_header_t;
 
-    // /**
-    //  * read head of WAV file
-    //  */
-    // uint8_t *p = g_audio_data[audio].audio_buffer;
-    // wav_header_t *wav_head = (wav_header_t *)p;
+    /**
+     * read head of WAV file
+     */
+    uint8_t *p = g_audio_data[audio].audio_buffer;
+    wav_header_t *wav_head = (wav_header_t *)p;
 
     // if (NULL == strstr((char *)wav_head->Subchunk1ID, "fmt") &&
     //         NULL == strstr((char *)wav_head->Subchunk2ID, "data")) {
     //     ESP_LOGE(TAG, "Header of wav format error");
     //     return ESP_FAIL;
     // }
-    // p += sizeof(wav_header_t);
-    // size_t len = g_audio_data[audio].len - sizeof(wav_header_t);
-    // len = len & 0xfffffffc;
+    p += sizeof(wav_header_t);
+    size_t len = g_audio_data[audio].len - sizeof(wav_header_t);
+    len = len & 0xfffffffc;
     // ESP_LOGD(TAG, "frame_rate=%d, ch=%d, width=%d", wav_head->SampleRate, wav_head->NumChannels, wav_head->BitsPerSample);
-    // bsp_codec_set_fs(wav_head->SampleRate, wav_head->BitsPerSample, I2S_SLOT_MODE_STEREO);
+    bsp_codec_set_fs(wav_head->SampleRate, wav_head->BitsPerSample, I2S_SLOT_MODE_STEREO);
 
-    // bsp_codec_mute_set(true);
-    // bsp_codec_mute_set(false);
-    // bsp_codec_volume_set(100, NULL);
-    // size_t bytes_written = 0;
-    // vTaskDelay(pdMS_TO_TICKS(50));
+    bsp_codec_mute_set(true);
+    bsp_codec_mute_set(false);
+    bsp_codec_volume_set(100, NULL);
+    size_t bytes_written = 0;
+    vTaskDelay(pdMS_TO_TICKS(50));
 
-    // b_audio_playing = true;
-    // bsp_i2s_write((char *)p, len, &bytes_written, portMAX_DELAY);
-    // vTaskDelay(pdMS_TO_TICKS(20));
-    // b_audio_playing = false;
+    b_audio_playing = true;
+    bsp_i2s_write((char *)p, len, &bytes_written, portMAX_DELAY);
+    vTaskDelay(pdMS_TO_TICKS(20));
+    b_audio_playing = false;
 
-    // sys_param_t *param = settings_get_parameter();
-    // bsp_codec_volume_set(param->volume, NULL);
+    sys_param_t *param = settings_get_parameter();
+    bsp_codec_volume_set(param->volume, NULL);
     return ESP_OK;
 }
 
 bool sr_echo_is_playing(void)
 {
-    // return b_audio_playing;
-    return 0;
+    return b_audio_playing;
 }
 
 sr_language_t sr_detect_language()
 {
-//     static sr_language_t sr_current_lang = SR_LANG_MAX;
-//     esp_err_t ret;
-//     FILE *fp = NULL;
-//     const sys_param_t *param = settings_get_parameter();
+    static sr_language_t sr_current_lang = SR_LANG_MAX;
+    esp_err_t ret;
+    FILE *fp = NULL;
+    const sys_param_t *param = settings_get_parameter();
 
-//     if (param->sr_lang ^ sr_current_lang) {
-//         sr_current_lang = param->sr_lang;
-//         ESP_LOGI(TAG, "boardcast language change to = %s", (SR_LANG_EN == param->sr_lang ? "EN" : "CN"));
+    if (param->sr_lang ^ sr_current_lang) {
+        sr_current_lang = param->sr_lang;
+        ESP_LOGI(TAG, "boardcast language change to = %s", (SR_LANG_EN == param->sr_lang ? "EN" : "CN"));
 
-//         const char *files[2][3] = {
-//             {"/spiffs/echo_en_wake.wav", "/spiffs/echo_en_ok.wav", "/spiffs/echo_en_end.wav"},
-//             {"/spiffs/echo_cn_wake.wav", "/spiffs/echo_cn_ok.wav", "/spiffs/echo_cn_end.wav"},
-//         };
+        const char *files[2][3] = {
+            {"/spiffs/echo_en_wake.wav", "/spiffs/echo_en_ok.wav", "/spiffs/echo_en_end.wav"},
+            {"/spiffs/echo_cn_wake.wav", "/spiffs/echo_cn_ok.wav", "/spiffs/echo_cn_end.wav"},
+        };
 
-//         char audio_file[48] = {0};
-//         for (size_t i = 0; i < AUDIO_MAX; i++) {
-//             strncpy(audio_file, files[param->sr_lang][i], sizeof(audio_file));
-//             fp = fopen(audio_file, "rb");
-//             ESP_GOTO_ON_FALSE(NULL != fp, ESP_ERR_NOT_FOUND, err, TAG, "Open file %s failed", audio_file);
-//             size_t file_size = fm_get_file_size(audio_file);
+        char audio_file[48] = {0};
+        for (size_t i = 0; i < AUDIO_MAX; i++) {
+            strncpy(audio_file, files[param->sr_lang][i], sizeof(audio_file));
+            fp = fopen(audio_file, "rb");
+            ESP_GOTO_ON_FALSE(NULL != fp, ESP_ERR_NOT_FOUND, err, TAG, "Open file %s failed", audio_file);
+            size_t file_size = fm_get_file_size(audio_file);
 
-//             if (g_audio_data[i].audio_buffer) {
-//                 heap_caps_free(g_audio_data[i].audio_buffer);
-//                 g_audio_data[i].len = 0;
-//             }
-//             g_audio_data[i].len = file_size;
-//             g_audio_data[i].audio_buffer = heap_caps_calloc(1, file_size, MALLOC_CAP_8BIT | MALLOC_CAP_SPIRAM);
-//             ESP_GOTO_ON_FALSE(NULL != g_audio_data[i].audio_buffer, ESP_ERR_NO_MEM, err, TAG,  "No mem for sr echo buffer");
-//             fread(g_audio_data[i].audio_buffer, 1, file_size, fp);
-//             fclose(fp);
-//         }
-//     }
-//     return sr_current_lang;
+            if (g_audio_data[i].audio_buffer) {
+                heap_caps_free(g_audio_data[i].audio_buffer);
+                g_audio_data[i].len = 0;
+            }
+            g_audio_data[i].len = file_size;
+            g_audio_data[i].audio_buffer = heap_caps_calloc(1, file_size, MALLOC_CAP_8BIT | MALLOC_CAP_SPIRAM);
+            ESP_GOTO_ON_FALSE(NULL != g_audio_data[i].audio_buffer, ESP_ERR_NO_MEM, err, TAG,  "No mem for sr echo buffer");
+            fread(g_audio_data[i].audio_buffer, 1, file_size, fp);
+            fclose(fp);
+        }
+    }
+    return sr_current_lang;
 
-// err:
-//     if (ESP_OK != ret) {
-//         ESP_LOGI(TAG, "Read audio failed");
-//     }
+err:
+    if (ESP_OK != ret) {
+        ESP_LOGI(TAG, "Read audio failed");
+    }
 
-//     if (fp) {
-//         fclose(fp);
-//     }
-//     return sr_current_lang;
-    return SR_LANG_MAX;
+    if (fp) {
+        fclose(fp);
+    }
+    return sr_current_lang;
 }
 
 void sr_handler_task(void *pvParam)
