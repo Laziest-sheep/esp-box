@@ -19,7 +19,10 @@
 // #include "ui_sr.h"
 #include "app_sr_handler.h"
 #include "settings.h"
+#include "my_lvgl.h"
 // #include "ui_sensor_monitor.h"
+
+
 
 static const char *TAG = "sr_handler";
 
@@ -40,6 +43,45 @@ typedef struct {
 } audio_data_t;
 
 static audio_data_t g_audio_data[AUDIO_MAX];
+
+esp_sr_cmd_cb_t esp_sr_cmd_cb_list[MAX_CMD_NUM];
+
+static uint8_t esp_sr_cmd_cb_reg(uint8_t cmd_id, esp_sr_cmd_cb_t func)
+{
+    if((cmd_id < MAX_CMD_NUM) && (esp_sr_cmd_cb_list[cmd_id] == NULL))
+    {
+        esp_sr_cmd_cb_list[cmd_id] = func;
+        return 1;
+    }
+    else
+    {
+        return 0;
+    }
+}
+
+static void turn_on_the_light(void)
+{
+    ESP_LOGI(TAG, "turn_on_the_light");
+}
+
+static void turn_off_the_light(void)
+{
+    ESP_LOGI(TAG, "turn_off_the_light");
+}
+
+static void my_self(void)
+{
+    ESP_LOGI(TAG, "myself");
+    set_myself();
+}
+
+static void esp_sr_cb_init(void)
+{
+    esp_sr_cmd_cb_reg(0, (esp_sr_cmd_cb_t)turn_on_the_light);
+    esp_sr_cmd_cb_reg(1, (esp_sr_cmd_cb_t)turn_off_the_light);
+    esp_sr_cmd_cb_reg(2, (esp_sr_cmd_cb_t)my_self);
+}
+
 
 static esp_err_t sr_echo_play(audio_segment_t audio)
 {
@@ -155,6 +197,8 @@ void sr_handler_task(void *pvParam)
     sr_language_t sr_current_lang;
     audio_player_state_t last_player_state = AUDIO_PLAYER_STATE_IDLE;
 
+    esp_sr_cb_init();
+
     while (true) {
         sr_result_t result;
         app_sr_get_result(&result, portMAX_DELAY);
@@ -234,10 +278,12 @@ void sr_handler_task(void *pvParam)
             case SR_CMD_LIGHT_ON:
                 // app_pwm_led_set_power(1);
                 ESP_LOGI(TAG, "SR_CMD_LIGHT_ON");
+                esp_sr_cmd_cb_list[0]();
                 break;
             case SR_CMD_LIGHT_OFF:
                 // app_pwm_led_set_power(0);
                 ESP_LOGI(TAG, "SR_CMD_LIGHT_OFF");
+                esp_sr_cmd_cb_list[1]();
                 break;
             case SR_CMD_CUSTOMIZE_COLOR: {
                 // uint16_t h;
@@ -283,6 +329,10 @@ void sr_handler_task(void *pvParam)
 
             case SR_CMD_AC_OFF:
                 // ui_sensor_set_ac_poweroff();
+                break;
+
+            case SR_CMD_MYSELF:
+                esp_sr_cmd_cb_list[2]();
                 break;
 
             default:

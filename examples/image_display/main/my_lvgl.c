@@ -40,6 +40,7 @@ static lv_obj_t *obj_SR_bg;
 static lv_obj_t *label_led;
 static lv_obj_t *label_AC;
 static lv_obj_t *label_SR;
+static lv_obj_t *label_myself;
 static lv_font_t *font = (lv_font_t *)&lv_font_montserrat_12;
 
 
@@ -101,6 +102,23 @@ static void scr_respond_init(void)
 
 }
 
+void lv_load_listen(void)
+{
+    lv_scr_load(scr_listen);
+}
+
+void lv_load_func(void)
+{
+    lv_scr_load(scr_func);
+}
+
+void set_myself(void)
+{
+    label_myself = lv_label_create(scr_listen);
+    lv_label_set_text(label_myself, "YOU SB");
+    lv_obj_set_style_text_font(label_myself, font, LV_STATE_DEFAULT);
+    lv_obj_align(label_myself, LV_ALIGN_CENTER, 0, 0);
+}
 
 static void scr_module_init(void)
 {

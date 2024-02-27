@@ -13,6 +13,16 @@
 extern "C" {
 #endif
 
+typedef void (*esp_sr_cmd_cb_t)(void);
+
+typedef enum
+{
+    TURN_ON_THE_LIGHT = 0,
+    TURN_OFF_THE_LIGHT = 1,
+    MY_SELF = 2,
+    MAX_CMD_NUM = 10
+}ESP_SR_CMD_ID;
+
 bool sr_echo_is_playing(void);
 
 void sr_handler_task(void *pvParam);

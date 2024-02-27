@@ -31,6 +31,7 @@
 #include "model_path.h"
 #include "bsp_board.h"
 #include "settings.h"
+#include "my_lvgl.h"
 // #include "ui_mute.h"
 // #include "ui_sensor_monitor.h"
 
@@ -91,6 +92,7 @@ static const sr_cmd_t g_default_cmd_info[] = {
     // Chinese
     {SR_CMD_LIGHT_ON, SR_LANG_CN, 0, "打开电灯", "da kai dian deng", {NULL}},
     {SR_CMD_LIGHT_OFF, SR_LANG_CN, 0, "关闭电灯", "guan bi dian deng", {NULL}},
+    {SR_CMD_MYSELF, SR_LANG_CN, 0, "你是笨蛋", "ni shi ben dan", {NULL}},
     // {SR_CMD_SET_RED, SR_LANG_CN, 0, "调成红色", "tiao cheng hong se", {NULL}},
     // {SR_CMD_SET_GREEN, SR_LANG_CN, 0, "调成绿色", "tiao cheng lv se", {NULL}},
     // {SR_CMD_SET_BLUE, SR_LANG_CN, 0, "调成蓝色", "tiao cheng lan se", {NULL}},
@@ -194,6 +196,7 @@ static void audio_detect_task(void *arg)
 
         if (res->wakeup_state == WAKENET_DETECTED) {
             ESP_LOGI(TAG, LOG_BOLD(LOG_COLOR_GREEN) "wakeword detected");
+            lv_load_listen();
             sr_result_t result = {
                 .wakenet_mode = WAKENET_DETECTED,
                 .state = ESP_MN_STATE_DETECTING,
@@ -225,6 +228,7 @@ static void audio_detect_task(void *arg)
 
             if (ESP_MN_STATE_TIMEOUT == mn_state) {
                 ESP_LOGW(TAG, "Time out");
+                lv_load_func();
                 sr_result_t result = {
                     .wakenet_mode = WAKENET_NO_DETECT,
                     .state = mn_state,
@@ -370,7 +374,7 @@ esp_err_t app_sr_start(bool record_en)
 
     sys_param_t *param = settings_get_parameter();
     g_sr_data->lang = SR_LANG_MAX;
-    ret = app_sr_set_language(param->sr_lang);
+    ret = app_sr_set_language(SR_LANG_CN);
     ESP_GOTO_ON_FALSE(ESP_OK == ret, ESP_FAIL, err, TAG,  "Failed to set language");
 
     ret_val = xTaskCreatePinnedToCore(&audio_feed_task, "Feed Task", 4 * 1024, (void *)afe_data, 5, &g_sr_data->feed_task, 0);
