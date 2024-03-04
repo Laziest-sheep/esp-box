@@ -2,17 +2,17 @@ menu "Example Configuration"
 
     config ESP_WIFI_SSID
         string "WiFi SSID"
-        default "My Network SSID"
+        default "test123"
         help
             SSID (network name) for the example to connect to.
     config ESP_WIFI_PASSWORD
         string "WiFi Password"
-        default "My Password"
+        default "nothingistrue"
         help
             WiFi password (WPA or WPA2) for the example to use.
     config OPENAI_API_KEY
         string "OpenAI Key"
-        default "sk-xxxxxxxx"
+        default "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"
         help
             OpenAI api key for the example to use.
     config OPENAI_URL

@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2022-2023 Espressif Systems (Shanghai) CO LTD
+/* SPDX-FileCopyrightText: 2022-2024 Espressif Systems (Shanghai) CO LTD
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -36,8 +36,8 @@ static void uf2_nvs_modified_cb()
 
 void app_main(void)
 {
-    const esp_partition_t *update_partition = esp_partition_find_first(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_APP_OTA_0, NULL);
-    ESP_LOGI(TAG, "Switch to partition OTA_0");
+    const esp_partition_t *update_partition = esp_partition_find_first(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_APP_FACTORY, NULL);
+    ESP_LOGI(TAG, "Switch to partition factory");
     esp_ota_set_boot_partition(update_partition);
     esp_err_t err = ESP_OK;
 
@@ -114,7 +114,16 @@ void app_main(void)
     ESP_ERROR_CHECK(esp_tinyuf2_install(NULL, &nvs_config));
 
     bsp_i2c_init();
-    bsp_display_start();
+
+    bsp_display_cfg_t cfg = {
+        .lvgl_port_cfg = ESP_LVGL_PORT_INIT_CONFIG(),
+        .buffer_size = BSP_LCD_H_RES * CONFIG_BSP_LCD_DRAW_BUF_HEIGHT,
+        .double_buffer = 0,
+        .flags = {
+            .buff_dma = true,
+        }
+    };
+    bsp_display_start_with_config(&cfg);
     bsp_display_backlight_on();
     ui_init();
 
