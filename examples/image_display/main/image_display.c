@@ -17,6 +17,7 @@
 #include "settings.h"
 #include "nvs_flash.h"
 #include "nvs.h"
+#include "app_wifi.h"
 
 static const char *TAG = "main";
 
@@ -94,6 +95,8 @@ void app_main(void)
     screen_init();
 
     sr_init();
+
+    app_network_start();
 }
 
 static void btn_event_cb(lv_event_t *event)

@@ -8,6 +8,18 @@
 
 #include "app_sr.h"
 
+#define SSID_SIZE 32
+#define PASSWORD_SIZE 64
+#define KEY_SIZE 64
+#define URL_SIZE 64
+
+typedef struct {
+    char ssid[SSID_SIZE];             /* SSID of target AP. */
+    char password[PASSWORD_SIZE];     /* Password of target AP. */
+    char key[KEY_SIZE];               /* OpenAI key. */
+    char url[URL_SIZE];               /* OpenAI Base url. */
+} wifi_param_t;
+
 typedef struct {
     bool need_hint;
     sr_language_t sr_lang;
