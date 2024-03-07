@@ -216,34 +216,34 @@ static void wifi_init_sta(void)
     assert(sta_netif);
 
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
-    // ESP_ERROR_CHECK(esp_wifi_init(&cfg));
+    ESP_ERROR_CHECK(esp_wifi_init(&cfg));
 
-    // esp_event_handler_instance_t instance_any_id;
-    // esp_event_handler_instance_t instance_got_ip;
-    // ESP_ERROR_CHECK(esp_event_handler_instance_register(WIFI_EVENT,
-    //                 ESP_EVENT_ANY_ID,
-    //                 &event_handler,
-    //                 NULL,
-    //                 &instance_any_id));
-    // ESP_ERROR_CHECK(esp_event_handler_instance_register(IP_EVENT,
-    //                 IP_EVENT_STA_GOT_IP,
-    //                 &event_handler,
-    //                 NULL,
-    //                 &instance_got_ip));
+    esp_event_handler_instance_t instance_any_id;
+    esp_event_handler_instance_t instance_got_ip;
+    ESP_ERROR_CHECK(esp_event_handler_instance_register(WIFI_EVENT,
+                    ESP_EVENT_ANY_ID,
+                    &event_handler,
+                    NULL,
+                    &instance_any_id));
+    ESP_ERROR_CHECK(esp_event_handler_instance_register(IP_EVENT,
+                    IP_EVENT_STA_GOT_IP,
+                    &event_handler,
+                    NULL,
+                    &instance_got_ip));
 
-    // wifi_config_t wifi_config = { 
-    //     .sta = {
-    //         .ssid = {0}, 
-    //         .password = {0},
-    //     },
-    // };
+    wifi_config_t wifi_config = { 
+        .sta = {
+            .ssid = {0}, 
+            .password = {0},
+        },
+    };
 
-    // memcpy(wifi_config.sta.ssid, wifi_param.ssid, sizeof(wifi_config.sta.ssid));
-    // memcpy(wifi_config.sta.password, wifi_param.password, sizeof(wifi_config.sta.password));
-    // ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA) );
-    // ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config) );
-    // ESP_ERROR_CHECK(esp_wifi_start() );
-    // ESP_LOGI(TAG, "wifi_init_sta finished.%s, %s", wifi_config.sta.ssid, wifi_config.sta.password);
+    memcpy(wifi_config.sta.ssid, wifi_param.ssid, sizeof(wifi_config.sta.ssid));
+    memcpy(wifi_config.sta.password, wifi_param.password, sizeof(wifi_config.sta.password));
+    ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA) );
+    ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config) );
+    ESP_ERROR_CHECK(esp_wifi_start() );
+    ESP_LOGI(TAG, "wifi_init_sta finished.%s, %s", wifi_config.sta.ssid, wifi_config.sta.password);
 }
 
 static void network_task(void *args)
