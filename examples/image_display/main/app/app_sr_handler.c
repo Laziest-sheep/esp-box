@@ -20,6 +20,7 @@
 #include "app_sr_handler.h"
 #include "settings.h"
 #include "my_lvgl.h"
+#include "app_led.h"
 // #include "ui_sensor_monitor.h"
 
 
@@ -46,11 +47,13 @@ static audio_data_t g_audio_data[AUDIO_MAX];
 
 static void turn_on_the_light(void)
 {
+    app_pwm_led_set_power(1);
     ESP_LOGI(TAG, "turn_on_the_light");
 }
 
 static void turn_off_the_light(void)
 {
+    app_pwm_led_set_power(0);
     ESP_LOGI(TAG, "turn_off_the_light");
 }
 

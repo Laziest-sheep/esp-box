@@ -2,6 +2,7 @@
 #include "lvgl.h"
 #include "bsp/esp-bsp.h"
 #include "esp_log.h"
+#include "app_led.h"
 
 
 #define PROFILE_SIZE        150
@@ -57,11 +58,11 @@ static void switch_led_cb(lv_event_t *e)
 {
     if(lv_obj_has_state(switch_led, LV_STATE_CHECKED))
     {
-        
+        app_pwm_led_set_power(1);
     }
     else
     {
-        
+        app_pwm_led_set_power(0);
     }
 }
 

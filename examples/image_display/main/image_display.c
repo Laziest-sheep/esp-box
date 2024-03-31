@@ -18,6 +18,7 @@
 #include "nvs_flash.h"
 #include "nvs.h"
 #include "app_wifi.h"
+#include "app_led.h"
 
 static const char *TAG = "main";
 
@@ -95,6 +96,9 @@ void app_main(void)
     screen_init();
 
     sr_init();
+
+    const board_res_desc_t *brd = bsp_board_get_description();
+    app_pwm_led_init(brd->PMOD2->row1[1], brd->PMOD2->row1[2], brd->PMOD2->row1[3]);
 
     app_network_start();
 }
