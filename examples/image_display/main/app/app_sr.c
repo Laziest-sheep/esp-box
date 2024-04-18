@@ -104,8 +104,8 @@ static const sr_cmd_t g_default_cmd_info[] = {
     // {SR_CMD_PAUSE, SR_LANG_CN, 0, "暂停播放", "zan ting bo fang", {NULL}},
     // {SR_CMD_PAUSE, SR_LANG_CN, 0, "停止播放", "ting zhi bo fang", {NULL}},
 
-    // {SR_CMD_AC_ON, SR_LANG_CN, 0, "打开空调", "da kai kong tiao", {NULL}},
-    // {SR_CMD_AC_OFF, SR_LANG_CN, 0, "关闭空调", "guan bi kong tiao", {NULL}},
+    {TURN_ON_AC, SR_LANG_CN, 0, "打开空调", "da kai kong tiao", {NULL}},
+    {TURN_OFF_AC, SR_LANG_CN, 0, "关闭空调", "guan bi kong tiao", {NULL}},
     // {SR_CMD_MAX, SR_LANG_CN, 0, "舒适模式", "shu shi mo shi", {NULL}},
     // {SR_CMD_MAX, SR_LANG_CN, 0, "制冷模式", "zhi leng mo shi", {NULL}},
     // {SR_CMD_MAX, SR_LANG_CN, 0, "制热模式", "zhi re mo shi", {NULL}},

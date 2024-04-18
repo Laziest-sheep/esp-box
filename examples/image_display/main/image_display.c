@@ -65,6 +65,7 @@ void sr_init(void)
     app_sr_start(false);
 }
 
+extern void gatts_init(void);
 void app_main(void)
 {
 
@@ -101,6 +102,12 @@ void app_main(void)
     app_pwm_led_init(brd->PMOD2->row1[1], brd->PMOD2->row1[2], brd->PMOD2->row1[3]);
 
     app_network_start();
+
+    vTaskDelay(pdMS_TO_TICKS(3000));
+    
+    gatts_init();
+
+
 }
 
 static void btn_event_cb(lv_event_t *event)

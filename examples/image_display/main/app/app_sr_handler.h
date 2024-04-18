@@ -20,6 +20,8 @@ typedef enum
     TURN_ON_THE_LIGHT = 0,
     TURN_OFF_THE_LIGHT,
     MY_SELF,
+    TURN_ON_AC,
+    TURN_OFF_AC,
     MAX_CMD_NUM
 }ESP_SR_CMD_ID;
 

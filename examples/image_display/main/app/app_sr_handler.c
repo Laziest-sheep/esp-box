@@ -31,6 +31,9 @@ static bool b_audio_playing = false;
 
 extern file_iterator_instance_t *file_iterator;
 
+extern void bt_led_set(uint8_t on_off);
+extern void AC_switch_set(uint8_t data);
+
 typedef enum {
     AUDIO_WAKE,
     AUDIO_OK,
@@ -63,10 +66,24 @@ static void my_self(void)
     set_myself();
 }
 
+static void turn_on_AC(void)
+{
+    bt_led_set(1);
+    AC_switch_set(1);
+}
+
+static void turn_off_AC(void)
+{
+    bt_led_set(0);
+    AC_switch_set(0);
+}
+
 static esp_sr_cmd_cb_t esp_sr_cmd_cb_list[MAX_CMD_NUM] = { \
     turn_on_the_light,  \
     turn_off_the_light, \
-    my_self             \
+    my_self,             \
+    turn_on_AC,          \
+    turn_off_AC          \
 };
 
 static esp_err_t sr_echo_play(audio_segment_t audio)

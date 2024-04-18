@@ -44,6 +44,8 @@ static lv_obj_t *label_SR;
 static lv_obj_t *label_myself;
 static lv_font_t *font = (lv_font_t *)&lv_font_montserrat_12;
 
+extern void bt_led_set(uint8_t on_off);
+
 
 static void btn_start_cb(lv_event_t *e)
 {
@@ -70,11 +72,11 @@ static void switch_AC_cb(lv_event_t *e)
 {
     if(lv_obj_has_state(switch_AC, LV_STATE_CHECKED))
     {
-        
+        bt_led_set(1);
     }
     else
     {
-        
+        bt_led_set(0);
     }
 }
 
@@ -260,4 +262,16 @@ void screen_init(void)
 
     //TODO
     /*答复界面*/
+}
+
+void AC_switch_set(uint8_t data)
+{
+    if(data == 0)
+    {
+        lv_obj_add_state(switch_AC, LV_STATE_DEFAULT);
+    }
+    else
+    {
+        lv_obj_add_state(switch_AC, LV_STATE_CHECKED);
+    }
 }
