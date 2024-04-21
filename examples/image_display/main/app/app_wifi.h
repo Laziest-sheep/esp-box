@@ -55,7 +55,7 @@ void app_network_start(void);
 bool app_wifi_lock(uint32_t timeout_ms);
 void app_wifi_unlock(void);
 void app_wifi_state_set(wifi_scan_status_t status);
-
+bool get_wifi_state(void);
 #ifdef __cplusplus
 }
 #endif

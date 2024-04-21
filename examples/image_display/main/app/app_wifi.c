@@ -20,6 +20,7 @@
 
 #include "app_wifi.h"
 #include "settings.h"
+#include "my_lvgl.h"
 
 /* The examples use WiFi configuration that you can set via project configuration menu
 
@@ -246,6 +247,9 @@ static void wifi_init_sta(void)
     ESP_LOGI(TAG, "wifi_init_sta finished.%s, %s", wifi_config.sta.ssid, wifi_config.sta.password);
 }
 
+extern void get_time_init(void);
+uint8_t is_init = 0;
+uint32_t tick = 0;
 static void network_task(void *args)
 {
     net_event_t net_event;
@@ -279,6 +283,19 @@ static void network_task(void *args)
             default:
                 break;
             }
+        }
+        if(get_wifi_state() == true && is_init == 0)
+        {
+            get_time_init();
+            reveal_time();
+            tick = esp_log_timestamp();
+            is_init = 1;
+        }
+        if(is_init == 1 && (esp_log_timestamp() - tick > 60000))
+        {
+            get_time_init();
+            reveal_time();
+            tick = esp_log_timestamp();
         }
     }
     vTaskDelete(NULL);
@@ -317,4 +334,9 @@ void app_network_start(void)
 
     ret_val = xTaskCreatePinnedToCore(network_task, "NetWork Task", 5 * 1024, NULL, 1, NULL, 0);
     ESP_ERROR_CHECK_WITHOUT_ABORT((pdPASS == ret_val) ? ESP_OK : ESP_FAIL);
+}
+
+bool get_wifi_state(void)
+{
+    return wifi_connected;
 }

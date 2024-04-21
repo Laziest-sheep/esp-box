@@ -27,6 +27,7 @@ static lv_obj_t *scr_listen;
 static lv_obj_t *scr_respond;
 static lv_obj_t *btn_start;
 static lv_obj_t *label_start;
+static lv_obj_t *label_time;
 static lv_obj_t *switch_led;
 static lv_obj_t *switch_AC;     //air-conditioning
 static lv_obj_t *switch_SR;     //speech recognition
@@ -42,10 +43,12 @@ static lv_obj_t *label_led;
 static lv_obj_t *label_AC;
 static lv_obj_t *label_SR;
 static lv_obj_t *label_myself;
-static lv_font_t *font = (lv_font_t *)&lv_font_montserrat_12;
+static lv_font_t *font_12 = (lv_font_t *)&lv_font_montserrat_12;
+static lv_font_t *font_14 = (lv_font_t *)&lv_font_montserrat_14;
 
 extern void bt_led_set(uint8_t on_off);
 
+char time_buf[32] = {0};
 
 static void btn_start_cb(lv_event_t *e)
 {
@@ -119,7 +122,7 @@ void set_myself(void)
 {
     label_myself = lv_label_create(scr_listen);
     lv_label_set_text(label_myself, "YOU SB");
-    lv_obj_set_style_text_font(label_myself, font, LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(label_myself, font_12, LV_STATE_DEFAULT);
     lv_obj_align(label_myself, LV_ALIGN_CENTER, 0, 0);
 }
 
@@ -161,15 +164,25 @@ static void scr_module_init(void)
 
     /*按钮标签文字配置*/
     label_start = lv_label_create(btn_start);
-    lv_obj_set_style_text_font(label_start, font, LV_PART_MAIN);
+    lv_obj_set_style_text_font(label_start, font_12, LV_PART_MAIN);
     lv_label_set_text(label_start, "START WORK");
     lv_obj_set_align(label_start, LV_ALIGN_CENTER);
+
+    /*时间标签配置*/
+    label_time = lv_label_create(scr_func);
+    lv_obj_set_style_text_font(label_time, font_14, LV_PART_MAIN);
+    // lv_label_set_text(label_time, time_buf);
 
     /*语音识别界面*/
     scr_listen_init();
 
     /*回复界面*/
     scr_respond_init();
+}
+
+void reveal_time(void)
+{
+    lv_label_set_text(label_time, time_buf);
 }
 
 static void led_module_init(void)
@@ -181,7 +194,7 @@ static void led_module_init(void)
 
     label_led = lv_label_create(obj_led_bg);
     lv_label_set_text(label_led, "LED");
-    lv_obj_set_style_text_font(label_led, font, LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(label_led, font_12, LV_STATE_DEFAULT);
     lv_obj_align(label_led, LV_ALIGN_CENTER, 0, 15);
 
     switch_led = lv_switch_create(obj_led_bg);
@@ -204,7 +217,7 @@ static void AC_module_init(void)
 
     label_AC = lv_label_create(obj_AC_bg);
     lv_label_set_text(label_AC, "AC");
-    lv_obj_set_style_text_font(label_AC, font, LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(label_AC, font_12, LV_STATE_DEFAULT);
     lv_obj_align(label_AC, LV_ALIGN_CENTER, 0, 15);
 
     switch_AC = lv_switch_create(obj_AC_bg);
@@ -227,7 +240,7 @@ static void SR_module_init(void)
 
     label_SR = lv_label_create(obj_SR_bg);
     lv_label_set_text(label_SR, "SR");
-    lv_obj_set_style_text_font(label_SR, font, LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(label_SR, font_12, LV_STATE_DEFAULT);
     lv_obj_align(label_SR, LV_ALIGN_CENTER, 0, 15);
 
     switch_SR = lv_switch_create(obj_SR_bg);
